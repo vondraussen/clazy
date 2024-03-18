@@ -25,7 +25,8 @@ jobs:
       run: choco install ninja -y
 
     - name: MSVC env
-      run: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat
+      run: |
+        cmd /c "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 
     - name: Configure CMake
       run: >
