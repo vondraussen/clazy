@@ -12,12 +12,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      path: 'clazy'
+      with:
+        path: 'clazy'
 
     - uses: actions/checkout@v4
-      path: 'llvm'
-      repo: 'https://github.com/llvm/llvm-project.git'
-      ref: 'llvmorg-11.0.0'
+      with:
+        path: 'llvm'
+        repo: 'https://github.com/llvm/llvm-project.git'
+        ref: 'llvmorg-11.0.0'
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
