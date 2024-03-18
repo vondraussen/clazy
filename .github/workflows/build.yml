@@ -26,7 +26,7 @@ jobs:
 
     - name: MSVC env
       run: |
-        cmd /c "C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
+        powershell.exe -c "C:\Program Files (x86)\Microsoft\Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 
     - name: Configure CMake
       run: >
