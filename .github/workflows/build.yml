@@ -1,0 +1,86 @@
+name: MSBuild
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Install Ninja
+      run: |
+        curl -L https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip -o ninja-win.zip
+        Expand-Archive -Path ninja-win.zip -DestinationPath $env:USERPROFILE\.ninja
+        $env:PATH += ";$env:USERPROFILE\.ninja"
+        Write-Host "Ninja installed successfully"
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+
+name: CMake
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      path: 'clazy'
+
+    - uses: actions/checkout@v4
+      path: 'llvm'
+      repo: 'https://github.com/llvm/llvm-project.git'
+      ref: 'llvmorg-11.0.0'
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        cmake -B ${{ github.workspace }}/llvm/build -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}\llvm-install\
+        -DLLVM_EXPORT_SYMBOLS_FOR_PLUGINS=ON
+        -DLLVM_INCLUDE_EXAMPLES=OFF
+        -DLLVM_TARGETS_TO_BUILD="X86"
+        -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
+        -DCMAKE_CXX_COMPILER=cl
+        -DCMAKE_C_COMPILER=cl
+        -DCMAKE_BUILD_TYPE=Release
+        -G "Ninja" ${{ github.workspace }}/llvm
+
+    - name: Build
+      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      run: cmake --build ${{ github.workspace }}/llvm/build --config Release
