@@ -35,8 +35,6 @@ jobs:
         -DLLVM_INCLUDE_EXAMPLES=OFF
         -DLLVM_TARGETS_TO_BUILD="X86"
         -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
-        -DCMAKE_CXX_COMPILER=cl
-        -DCMAKE_C_COMPILER=cl
         -DCMAKE_BUILD_TYPE=Release
         -G "Ninja" ${{ github.workspace }}/llvm/llvm
 
